@@ -101,7 +101,7 @@ func main() {
 
 	// Create indexes
 	log.Println("Creating indexes...")
-	
+
 	_, err = db.Exec(`
 		CREATE INDEX IF NOT EXISTS idx_ntp_servers_active ON ntp_servers(is_active)
 	`)
@@ -120,7 +120,7 @@ func main() {
 
 	// Create trigger for updated_at
 	log.Println("Creating trigger for updated_at...")
-	
+
 	_, err = db.Exec(`
 		DROP TRIGGER IF EXISTS update_ntp_servers_updated_at ON ntp_servers
 	`)
