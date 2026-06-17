@@ -1,8 +1,8 @@
 # IBM Storage Virtualize Snapshot Manager
 
-[![CI](https://github.com/[org]/ibm-storage-virtualize-snapshot-manager/workflows/CI/badge.svg)](https://github.com/[org]/ibm-storage-virtualize-snapshot-manager/actions/workflows/ci.yml)
-[![Container Build](https://github.com/[org]/ibm-storage-virtualize-snapshot-manager/workflows/Container%20Build/badge.svg)](https://github.com/[org]/ibm-storage-virtualize-snapshot-manager/actions/workflows/container-build.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/[org]/ibm-storage-virtualize-snapshot-manager)](https://goreportcard.com/report/github.com/[org]/ibm-storage-virtualize-snapshot-manager)
+[![CI](https://github.com/olemyk/ibm-storage-virtualize-snapshot-manager/workflows/CI/badge.svg)](https://github.com/olemyk/ibm-storage-virtualize-snapshot-manager/actions/workflows/ci.yml)
+[![Container Build](https://github.com/olemyk/ibm-storage-virtualize-snapshot-manager/workflows/Container%20Build/badge.svg)](https://github.com/olemyk/ibm-storage-virtualize-snapshot-manager/actions/workflows/container-build.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/olemyk/ibm-storage-virtualize-snapshot-manager)](https://goreportcard.com/report/github.com/olemyk/ibm-storage-virtualize-snapshot-manager)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 A web-based application for managing multiple snapshot schedules per volume group on IBM Storage Virtualize systems (FlashSystem).
@@ -48,10 +48,10 @@ Pull the latest images from GitHub Container Registry:
 
 ```bash
 # Backend
-docker pull ghcr.io/[org]/ibm-storage-virtualize-snapshot-manager/backend:latest
+docker pull ghcr.io/olemyk/ibm-storage-virtualize-snapshot-manager/backend:latest
 
 # Frontend
-docker pull ghcr.io/[org]/ibm-storage-virtualize-snapshot-manager/frontend:latest
+docker pull ghcr.io/olemyk/ibm-storage-virtualize-snapshot-manager/frontend:latest
 ```
 
 **Supported Architectures:**
