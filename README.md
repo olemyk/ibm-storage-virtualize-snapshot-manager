@@ -1,5 +1,10 @@
 # IBM Storage Virtualize Snapshot Manager
 
+[![CI](https://github.com/[org]/ibm-storage-virtualize-snapshot-manager/workflows/CI/badge.svg)](https://github.com/[org]/ibm-storage-virtualize-snapshot-manager/actions/workflows/ci.yml)
+[![Container Build](https://github.com/[org]/ibm-storage-virtualize-snapshot-manager/workflows/Container%20Build/badge.svg)](https://github.com/[org]/ibm-storage-virtualize-snapshot-manager/actions/workflows/container-build.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/[org]/ibm-storage-virtualize-snapshot-manager)](https://goreportcard.com/report/github.com/[org]/ibm-storage-virtualize-snapshot-manager)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
 A web-based application for managing multiple snapshot schedules per volume group on IBM Storage Virtualize systems (FlashSystem).
 
 > **⚠️ DISCLAIMER**: This is an unofficial, community-driven project and is NOT affiliated with, endorsed by, or supported by IBM Corporation. This software is provided "AS IS" without warranty of any kind. Use at your own risk.
@@ -37,7 +42,23 @@ Choose one of the following installation methods:
 
 ### Option 1: Container Deployment (Recommended)
 
-**Quick Start with Podman:**
+**Pre-built Container Images:**
+
+Pull the latest images from GitHub Container Registry:
+
+```bash
+# Backend
+docker pull ghcr.io/[org]/ibm-storage-virtualize-snapshot-manager/backend:latest
+
+# Frontend
+docker pull ghcr.io/[org]/ibm-storage-virtualize-snapshot-manager/frontend:latest
+```
+
+**Supported Architectures:**
+- `linux/amd64` - Intel/AMD 64-bit
+- `linux/arm64` - ARM 64-bit (Apple Silicon, ARM servers)
+
+**Quick Start with Podman/Docker:**
 
 ```bash
 # 1. Clone the repository
@@ -62,8 +83,9 @@ nano .env
 - ✅ Nginx reverse proxy with security headers
 - ✅ Automatic health checks and restart policies
 - ✅ Easy backup and restore scripts
+- ✅ Multi-architecture support (amd64, arm64)
 
-**See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.**
+**See [DEPLOYMENT.md](DEPLOYMENT.md) and [docs/CONTAINER_USAGE.md](docs/CONTAINER_USAGE.md) for detailed instructions.**
 
 ### Option 2: Local Development Setup
 

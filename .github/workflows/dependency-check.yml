@@ -1,0 +1,233 @@
+name: Dependency Check
+
+on:
+  schedule:
+    # Run every Sunday at 00:00 UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+jobs:
+  check-go-dependencies:
+    name: Check Go Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
+      - name: Check for outdated dependencies
+        id: outdated
+        working-directory: backend
+        run: |
+          echo "## Go Dependencies Status" > /tmp/go-deps.md
+          echo "" >> /tmp/go-deps.md
+          
+          # Check for updates
+          echo "### Outdated Modules" >> /tmp/go-deps.md
+          echo '```' >> /tmp/go-deps.md
+          go list -u -m all | grep '\[' >> /tmp/go-deps.md || echo "All dependencies are up to date!" >> /tmp/go-deps.md
+          echo '```' >> /tmp/go-deps.md
+          
+          # Count outdated
+          OUTDATED_COUNT=$(go list -u -m all | grep -c '\[' || echo "0")
+          echo "outdated_count=$OUTDATED_COUNT" >> $GITHUB_OUTPUT
+          
+          cat /tmp/go-deps.md
+
+      - name: Run security audit
+        id: vuln
+        working-directory: backend
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          
+          echo "" >> /tmp/go-deps.md
+          echo "### Security Vulnerabilities" >> /tmp/go-deps.md
+          echo '```' >> /tmp/go-deps.md
+          govulncheck ./... >> /tmp/go-deps.md 2>&1 || echo "Vulnerabilities found!" >> /tmp/go-deps.md
+          echo '```' >> /tmp/go-deps.md
+          
+          cat /tmp/go-deps.md
+
+      - name: Upload Go dependency report
+        uses: actions/upload-artifact@v4
+        with:
+          name: go-dependency-report
+          path: /tmp/go-deps.md
+
+  check-npm-dependencies:
+    name: Check npm Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Check for outdated dependencies
+        id: outdated
+        working-directory: frontend
+        run: |
+          echo "## npm Dependencies Status" > /tmp/npm-deps.md
+          echo "" >> /tmp/npm-deps.md
+          
+          echo "### Outdated Packages" >> /tmp/npm-deps.md
+          echo '```' >> /tmp/npm-deps.md
+          npm outdated >> /tmp/npm-deps.md || echo "All dependencies are up to date!" >> /tmp/npm-deps.md
+          echo '```' >> /tmp/npm-deps.md
+          
+          cat /tmp/npm-deps.md
+
+      - name: Run security audit
+        id: audit
+        working-directory: frontend
+        continue-on-error: true
+        run: |
+          echo "" >> /tmp/npm-deps.md
+          echo "### Security Audit" >> /tmp/npm-deps.md
+          echo '```' >> /tmp/npm-deps.md
+          npm audit >> /tmp/npm-deps.md 2>&1 || echo "Vulnerabilities found!" >> /tmp/npm-deps.md
+          echo '```' >> /tmp/npm-deps.md
+          
+          cat /tmp/npm-deps.md
+
+      - name: Upload npm dependency report
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-dependency-report
+          path: /tmp/npm-deps.md
+
+  create-issue:
+    name: Create Dependency Issue
+    runs-on: ubuntu-latest
+    needs: [check-go-dependencies, check-npm-dependencies]
+    if: always()
+    permissions:
+      issues: write
+    
+    steps:
+      - name: Download Go report
+        uses: actions/download-artifact@v4
+        with:
+          name: go-dependency-report
+          path: ./reports
+
+      - name: Download npm report
+        uses: actions/download-artifact@v4
+        with:
+          name: npm-dependency-report
+          path: ./reports
+
+      - name: Create issue body
+        run: |
+          cat > issue-body.md << 'EOF'
+          # Weekly Dependency Check Report
+          
+          This is an automated report of outdated dependencies and security vulnerabilities.
+          
+          **Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Workflow Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          
+          ---
+          
+          EOF
+          
+          echo "## Backend (Go)" >> issue-body.md
+          cat ./reports/go-deps.md >> issue-body.md
+          
+          echo "" >> issue-body.md
+          echo "---" >> issue-body.md
+          echo "" >> issue-body.md
+          
+          echo "## Frontend (npm)" >> issue-body.md
+          cat ./reports/npm-deps.md >> issue-body.md
+          
+          echo "" >> issue-body.md
+          echo "---" >> issue-body.md
+          echo "" >> issue-body.md
+          
+          cat >> issue-body.md << 'EOF'
+          ## Action Required
+          
+          Please review the outdated dependencies and security vulnerabilities listed above.
+          
+          ### To update dependencies:
+          
+          **Backend:**
+          ```bash
+          cd backend
+          make deps-update
+          make test
+          ```
+          
+          **Frontend:**
+          ```bash
+          cd frontend
+          npm update
+          npm audit fix
+          npm test
+          ```
+          
+          ### Manual Review
+          
+          For major version updates or security vulnerabilities, please:
+          1. Review the changelog for breaking changes
+          2. Update code if necessary
+          3. Run full test suite
+          4. Create a PR with the updates
+          
+          ---
+          
+          *This issue was automatically created by the Dependency Check workflow.*
+          EOF
+
+      - name: Create or update issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const issueBody = fs.readFileSync('issue-body.md', 'utf8');
+            
+            // Search for existing open dependency check issue
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'dependencies,automated',
+              per_page: 1
+            });
+            
+            if (issues.data.length > 0) {
+              // Update existing issue
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues.data[0].number,
+                body: issueBody
+              });
+              console.log(`Updated issue #${issues.data[0].number}`);
+            } else {
+              // Create new issue
+              const issue = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `Weekly Dependency Check - ${new Date().toISOString().split('T')[0]}`,
+                body: issueBody,
+                labels: ['dependencies', 'automated', 'maintenance']
+              });
+              console.log(`Created issue #${issue.data.number}`);
+            }
+
+# Made with Bob

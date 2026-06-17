@@ -7,7 +7,17 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "echo \"Tests not yet implemented\" && exit 0",
+    "test:watch": "echo \"Tests not yet implemented\"",
+    "deps:check": "npm outdated",
+    "deps:audit": "npm audit",
+    "deps:update": "npm update",
+    "deps:update-interactive": "npx npm-check-updates -i",
+    "deps:fix": "npm audit fix",
+    "ci": "npm run lint && npm run build",
+    "docker:build": "docker build -t snapshot-manager-frontend:latest .",
+    "docker:run": "docker run -p 80:80 -p 443:443 snapshot-manager-frontend:latest"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.100.14",
