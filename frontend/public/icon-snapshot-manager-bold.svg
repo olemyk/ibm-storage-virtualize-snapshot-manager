@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 250" width="100%" height="100%">
+  <defs>
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f62fe" />
+      <stop offset="100%" stop-color="#002d9c" />
+    </linearGradient>
+    
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00d3ff" />
+      <stop offset="100%" stop-color="#0f62fe" />
+    </linearGradient>
+
+    <linearGradient id="silverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8d8d8d" />
+      <stop offset="100%" stop-color="#393939" />
+    </linearGradient>
+    
+    <filter id="dropShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="2" dy="4" stdDeviation="4" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <g transform="translate(10, 0)">
+    <circle cx="120" cy="125" r="85" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-dasharray="4 8" />
+    
+    <path d="M 120 25 A 100 100 0 0 1 220 125 L 185 125 A 65 65 0 0 0 120 60 Z" fill="url(#blueGrad)" opacity="0.9" />
+    <path d="M 220 125 A 100 100 0 0 1 120 225 L 120 190 A 65 65 0 0 0 185 125 Z" fill="url(#blueGrad)" opacity="0.95" />
+    <path d="M 120 225 A 100 100 0 0 1 20 125 L 55 125 A 65 65 0 0 0 120 190 Z" fill="url(#cyanGrad)" />
+    <path d="M 20 125 A 100 100 0 0 1 120 25 L 120 60 A 65 65 0 0 0 55 125 Z" fill="url(#silverGrad)" />
+
+    <g transform="translate(120, 125) scale(0.95)" filter="url(#dropShadow)">
+      <path d="M 0 -24 L 28 -10 L 0 4 L -28 -10 Z" fill="#ffffff" />
+      <path d="M 28 -10 L 28 0 L 0 14 L 0 4 Z" fill="#cbd5e1" />
+      <path d="M -28 -10 L -28 0 L 0 14 L 0 4 Z" fill="#94a3b8" />
+      
+      <path d="M 28 8 L 28 18 L 0 32 L 0 22 Z" fill="#0f62fe" />
+      <path d="M -28 8 L -28 18 L 0 32 L 0 22 Z" fill="#002d9c" />
+      
+      <path d="M 28 26 L 28 36 L 0 50 L 0 40 Z" fill="#00d3ff" />
+      <path d="M -28 26 L -28 36 L 0 50 L 0 40 Z" fill="#0f62fe" />
+    </g>
+    
+    <path d="M 205 50 L 225 30" stroke="#00d3ff" stroke-width="4" stroke-linecap="round" />
+    <path d="M 220 45 L 230 35" stroke="#00d3ff" stroke-width="2" stroke-linecap="round" />
+  </g>
+
+  <text x="260" y="115" 
+        font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" 
+        font-size="54" 
+        font-weight="800" 
+        letter-spacing="1.5" 
+        fill="#0f62fe">SNAPSHOT</text>
+        
+  <text x="260" y="175" 
+        font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" 
+        font-size="42" 
+        font-weight="300" 
+        letter-spacing="8" 
+        fill="#525252">MANAGER</text>
+
+  <rect x="262" y="196" width="275" height="24" rx="4" fill="#f4f4f4" />
+  <text x="272" y="213"
+        font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+        font-size="17"
+        font-weight="600"
+        letter-spacing="1.2"
+        fill="#002d9c">FOR IBM STORAGE VIRTUALIZE</text>
+</svg>

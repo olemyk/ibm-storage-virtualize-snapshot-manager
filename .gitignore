@@ -1,0 +1,80 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+snapshot-manager
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+
+# Environment files
+.env
+*.env
+.env.keys
+!.env.example
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+backend/data/
+
+# Log files
+*.log
+logs/
+backend/logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.next/
+frontend/.nuxt/
+frontend/.cache/
+
+# Temporary files
+tmp/
+temp/
+temp/**
+
+# Process ID files
+*.pid
+
+# Server log files
+*-server.log
+backend/server*.log
+frontend/frontend.log
+
+# Coverage reports
+backend/coverage.*
+
+# Test outputs
+backend/scripts/*.txt
+backend/scripts/*.log
+
+# Development artifacts
+cfrest.schema.yaml
+
+# 
