@@ -29,15 +29,17 @@ jobs:
       - name: Run go fmt
         working-directory: backend
         run: |
-          if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
-            echo "Code is not formatted. Run 'go fmt ./...'"
-            gofmt -s -l .
+          # Check formatting (exclude scripts directory with multiple main functions)
+          UNFORMATTED=$(gofmt -s -l cmd internal 2>/dev/null)
+          if [ -n "$UNFORMATTED" ]; then
+            echo "Code is not formatted. Run 'go fmt ./cmd/... ./internal/...'"
+            echo "$UNFORMATTED"
             exit 1
           fi
 
       - name: Run go vet
         working-directory: backend
-        run: go vet ./...
+        run: go vet ./cmd/... ./internal/...
 
       - name: Run tests with coverage
         working-directory: backend
