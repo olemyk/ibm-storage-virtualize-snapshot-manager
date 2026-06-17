@@ -23,9 +23,10 @@ jobs:
       - name: Validate tag format
         run: |
           TAG=${GITHUB_REF#refs/tags/}
-          if [[ ! $TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          # Allow v1.2.3 or v1.2.3-suffix (for test releases)
+          if [[ ! $TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
             echo "Invalid tag format: $TAG"
-            echo "Expected format: v1.2.3"
+            echo "Expected format: v1.2.3 or v1.2.3-test"
             exit 1
           fi
           echo "Valid tag: $TAG"
