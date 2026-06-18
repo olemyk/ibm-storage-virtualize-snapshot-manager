@@ -4,6 +4,7 @@
 [![Container Build](https://github.com/olemyk/ibm-storage-virtualize-snapshot-manager/workflows/Container%20Build/badge.svg)](https://github.com/olemyk/ibm-storage-virtualize-snapshot-manager/actions/workflows/container-build.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/olemyk/ibm-storage-virtualize-snapshot-manager)](https://goreportcard.com/report/github.com/olemyk/ibm-storage-virtualize-snapshot-manager)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/olemyk/ibm-storage-virtualize-snapshot-manager)](https://github.com/olemyk/ibm-storage-virtualize-snapshot-manager/releases)
 
 A web-based application for managing multiple snapshot schedules per volume group on IBM Storage Virtualize systems (FlashSystem).
 
@@ -32,49 +33,103 @@ IBM Storage Virtualize allows only ONE snapshot policy per volume group. This ap
 
 ## Prerequisites
 
-- Go 1.21 or higher
+- Go 1.25.11 or higher
 - IBM Storage Virtualize system (FlashSystem) with REST API access
 - SQLite (included) or PostgreSQL (optional)
+- Podman or Docker (for containerized deployment)
 
 ## Installation
 
 Choose one of the following installation methods:
 
-### Option 1: Container Deployment (Recommended)
+### Option 1: Production Deployment (Recommended)
+
+**🚀 Standalone Script with Interactive Setup:**
+
+```bash
+# Download and run - interactive guided setup
+curl -fsSL https://raw.githubusercontent.com/olemyk/ibm-storage-virtualize-snapshot-manager/main/start-prod.sh -o start-prod.sh
+chmod +x start-prod.sh
+./start-prod.sh
+```
+
+**Interactive Setup Features:**
+
+The script provides a guided setup experience:
+
+1. **Automatic Dependency Download**
+   - Downloads `podman-compose.prod.yml` if missing
+   - Downloads PostgreSQL init script if missing
+   - Generates self-signed SSL certificates if missing
+
+2. **Interactive Configuration** (if .env doesn't exist)
+   - Prompts to auto-generate secure keys (DB_PASSWORD, JWT_SECRET, ENCRYPTION_KEY)
+   - Asks for admin username (default: admin)
+   - Asks for admin password (default: admin123)
+   - Auto-detects server IP and configures CORS
+   - Creates `.env` file with all settings
+
+3. **Automatic Deployment**
+   - Pulls latest images from GitHub Container Registry (GHCR)
+   - Starts PostgreSQL, Backend, and Frontend containers
+   - Creates admin user in database with your credentials
+   - Displays access URLs and login information
+
+**No More Default Password Issues!** The script creates the admin user with your chosen password during initial setup, ensuring login works immediately.
+
+**Access:** HTTPS only (port 443) - HTTP port 80 is not exposed for security.
 
 **Pre-built Container Images:**
 
-Pull the latest images from GitHub Container Registry:
-
 ```bash
 # Backend
-docker pull ghcr.io/olemyk/ibm-storage-virtualize-snapshot-manager/backend:latest
+podman pull ghcr.io/olemyk/ibm-storage-virtualize-snapshot-manager/backend:latest
 
 # Frontend
-docker pull ghcr.io/olemyk/ibm-storage-virtualize-snapshot-manager/frontend:latest
+podman pull ghcr.io/olemyk/ibm-storage-virtualize-snapshot-manager/frontend:latest
 ```
 
 **Supported Architectures:**
 - `linux/amd64` - Intel/AMD 64-bit
 - `linux/arm64` - ARM 64-bit (Apple Silicon, ARM servers)
 
-**Quick Start with Podman/Docker:**
+**Alternative: Full Repository Clone**
 
 ```bash
 # 1. Clone the repository
 git clone <repository-url>
 cd ibm-storage-virtualize-snapshot-manager
 
-# 2. Run setup (generates keys and certificates)
+# 2. Generate secure keys and certificates
 ./deploy/setup.sh
 
-# 3. Review and update .env file
+# 3. Review and update .env file (if needed)
 nano .env
 
-# 4. Start the application
-./deploy/start.sh
+# 4. Start the application (pulls images automatically)
+./start-prod.sh
 
 # 5. Access at https://localhost
+# Default credentials: admin / admin123
+```
+
+**Additional Commands:**
+
+```bash
+# View logs
+./start-prod.sh --logs
+
+# Check status
+./start-prod.sh --status
+
+# Stop services
+./start-prod.sh --stop
+
+# Force rebuild and restart
+./start-prod.sh --rebuild
+
+# Complete cleanup (removes containers, volumes, and images)
+./start-prod.sh --clean
 ```
 
 **Features:**
@@ -84,8 +139,28 @@ nano .env
 - ✅ Automatic health checks and restart policies
 - ✅ Easy backup and restore scripts
 - ✅ Multi-architecture support (amd64, arm64)
+- ✅ One-command deployment and updates
 
-**See [DEPLOYMENT.md](DEPLOYMENT.md) and [docs/CONTAINER_USAGE.md](docs/CONTAINER_USAGE.md) for detailed instructions.**
+**See [QUICK_START_PRODUCTION.md](QUICK_START_PRODUCTION.md), [DEPLOYMENT.md](DEPLOYMENT.md) and [docs/CONTAINER_USAGE.md](docs/CONTAINER_USAGE.md) for detailed instructions.**
+
+### Option 2: Development Build (Local Containers)
+
+Build containers from source for development:
+
+```bash
+# 1. Clone the repository
+git clone <repository-url>
+cd ibm-storage-virtualize-snapshot-manager
+
+# 2. Run setup (generates keys and certificates)
+./deploy/setup.sh
+
+# 3. Build and start containers
+podman-compose build
+podman-compose up -d
+
+# 4. Access at https://localhost
+```
 
 ### Option 2: Local Development Setup
 
@@ -260,15 +335,55 @@ The application uses the following tables:
 
 ## Troubleshooting
 
+### Login Issues (CORS or Password Problems)
+
+**Automated Fix (Recommended):**
+
+```bash
+# Auto-detect server IP and fix both CORS and password
+./fix-login-issues.sh
+
+# Or specify server IP manually
+./fix-login-issues.sh 10.33.3.104
+
+# Or specify custom password
+./fix-login-issues.sh 10.33.3.104 MyNewPassword123
+```
+
+**Manual CORS Fix:**
+
+If accessing from a different IP address:
+
+```bash
+# Add your server IP to .env
+echo "ALLOWED_ORIGINS=http://localhost,https://localhost,http://YOUR_IP,https://YOUR_IP" >> .env
+
+# Restart backend
+podman restart snapshot-manager-backend
+```
+
+**Password Reset Only:**
+
+```bash
+# Reset to default password (admin123)
+./reset-admin-password.sh
+
+# Or set custom password
+./reset-admin-password.sh MyNewPassword123
+```
+
 ### Database Issues
 
 ```bash
-# Check database
-sqlite3 data/snapshots.db ".tables"
+# Check database connection
+podman exec snapshot-manager-db psql -U snapshots -d snapshots -c "SELECT COUNT(*) FROM users;"
+
+# View admin user
+podman exec snapshot-manager-db psql -U snapshots -d snapshots -c "SELECT username, email, role FROM users WHERE username='admin';"
 
 # Reset database (WARNING: Deletes all data)
-rm data/snapshots.db
-# Restart application to recreate
+podman-compose -f podman-compose.prod.yml down -v
+podman-compose -f podman-compose.prod.yml up -d
 ```
 
 ### Connection Issues
@@ -277,13 +392,30 @@ rm data/snapshots.db
 - Check firewall rules (port 7443)
 - Verify credentials are correct
 - Check rate limits (max 3 auth requests/second)
+- Check CORS configuration: `podman exec snapshot-manager-backend env | grep ALLOWED_ORIGINS`
 
 ### Scheduler Issues
 
-- Check logs for errors
+- Check logs for errors: `podman logs snapshot-manager-backend`
 - Verify cron expressions are valid
 - Ensure schedules are marked as active
 - Check system time and timezone
+
+### Container Logs
+
+```bash
+# Backend logs
+podman logs snapshot-manager-backend
+
+# Frontend logs
+podman logs snapshot-manager-frontend
+
+# Database logs
+podman logs snapshot-manager-db
+
+# Follow logs in real-time
+./start-prod.sh --logs
+```
 
 ## Development
 
@@ -340,12 +472,63 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 **COMMUNITY SUPPORT ONLY**: Support is provided on a best-effort basis by the community. There are no service level agreements (SLAs) or guaranteed response times.
 
+## CI/CD and Automation
+
+This project includes comprehensive CI/CD pipelines powered by GitHub Actions:
+
+### Automated Workflows
+
+- **Continuous Integration** - Runs on every push and pull request
+  - Go backend tests with race detection
+  - Frontend build and tests
+  - Code quality checks (go fmt, go vet, eslint)
+  - Multi-platform testing
+
+- **Container Builds** - Automated multi-architecture builds
+  - Builds for linux/amd64 and linux/arm64
+  - Pushes to GitHub Container Registry (ghcr.io)
+  - Automatic tagging (latest, version tags)
+  - Build caching for faster builds
+
+- **Security Scanning** - Automated vulnerability detection
+  - Trivy container image scanning
+  - Go dependency vulnerability checks
+  - Frontend dependency audits
+  - Daily scheduled scans
+
+- **Release Automation** - Streamlined release process
+  - Automated changelog generation
+  - GitHub release creation
+  - Container image tagging
+  - Release notes compilation
+
+### Container Images
+
+Pre-built multi-architecture images are available:
+
+```bash
+# Backend
+podman pull ghcr.io/olemyk/ibm-storage-virtualize-snapshot-manager/backend:latest
+podman pull ghcr.io/olemyk/ibm-storage-virtualize-snapshot-manager/backend:v1.0.1
+
+# Frontend
+podman pull ghcr.io/olemyk/ibm-storage-virtualize-snapshot-manager/frontend:latest
+podman pull ghcr.io/olemyk/ibm-storage-virtualize-snapshot-manager/frontend:v1.0.1
+```
+
+**Supported Architectures:**
+- `linux/amd64` - Intel/AMD 64-bit processors
+- `linux/arm64` - ARM 64-bit (Apple Silicon, ARM servers)
+
+See [docs/CI_CD.md](docs/CI_CD.md) for detailed CI/CD documentation.
+
 ## Support
 
 For issues and questions:
 - Check the troubleshooting section
 - Review IBM Storage Virtualize REST API documentation
 - Open an issue on GitHub
+- Check [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines
 
 ## Deployment Options
 
@@ -365,12 +548,40 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for complete deployment guide.
 
 ## Roadmap
 
+### Completed ✅
 - [x] Container deployment with Podman/Docker
 - [x] PostgreSQL database support
 - [x] HTTPS with Nginx reverse proxy
 - [x] Automated backup scripts
-- [ ] Email notifications for failures
+- [x] CI/CD pipeline with automated testing
+- [x] Multi-architecture container builds (amd64, arm64)
+- [x] Automated security scanning
+- [x] Email notifications system
+- [x] Notification channels (Email, Slack, Webhook, SNMP)
+
+### In Progress 🚧
 - [ ] Snapshot cleanup automation
+- [ ] Prometheus metrics export
+- [ ] Grafana dashboard templates
+
+### Planned 📋
 - [ ] Multi-tenancy support
-- [ ] Prometheus metrics
-- [ ] Kubernetes support
+- [ ] Kubernetes deployment with Helm charts
+- [ ] Advanced RBAC
+- [ ] Snapshot replication management
+- [ ] GraphQL API
+- [ ] Webhook event system
+- [ ] Advanced reporting and analytics
+
+## Recent Updates (v1.0.1)
+
+- ✅ Updated Go to 1.25.11 with latest security patches
+- ✅ Upgraded all dependencies to latest stable versions
+- ✅ Added comprehensive CI/CD pipeline with GitHub Actions
+- ✅ Implemented automated testing and code quality checks
+- ✅ Added multi-architecture container builds
+- ✅ Enhanced documentation with CI/CD and container usage guides
+- ✅ Fixed linting and formatting issues
+- ✅ Improved build process and Makefile
+
+See [CHANGELOG.md](CHANGELOG.md) for detailed release notes.
