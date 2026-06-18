@@ -14,6 +14,23 @@ We're excited to announce the first official release of IBM Storage Virtualize S
 
 ## 🌟 Key Features
 
+### 🚀 NEW: One-Liner Production Deployment with Interactive Setup
+- **Standalone Script**: Download single script - no git clone required!
+- **Interactive Configuration**: Guided setup prompts for all settings
+- **Auto-Generate Credentials**: Secure random keys for DB_PASSWORD, JWT_SECRET, ENCRYPTION_KEY
+- **Custom Admin User**: Set your own admin username and password during setup
+- **Auto-Detect Server IP**: Automatically configures CORS for your server
+- **Admin User Creation**: Creates admin user in database with your credentials
+- **No Default Password Issues**: Your chosen password works immediately - no more "admin123" problems!
+- **Auto-Download Dependencies**: Automatically fetches compose file, init scripts, and SSL certs
+- **Simple Startup**: `./start-prod.sh` - interactive guided deployment
+- **Pre-built Images**: Available on GitHub Container Registry (GHCR)
+- **Multi-Architecture**: Supports amd64 and arm64 (Apple Silicon, ARM servers)
+- **Automatic Updates**: Pull latest images with `./start-prod.sh --rebuild`
+- **Status Management**: Built-in commands for logs, status, stop, and restart
+- **Environment Validation**: Checks prerequisites and validates configuration
+- **Color-Coded Output**: Clear, helpful status messages throughout deployment
+
 ### Multi-System Management
 - **Connect Multiple Systems**: Manage multiple IBM Storage Virtualize (FlashSystem) systems from a single interface
 - **Encrypted Credentials**: Storage system passwords encrypted with AES-256-GCM
@@ -106,31 +123,86 @@ We're excited to announce the first official release of IBM Storage Virtualize S
 
 ## 📦 Installation Methods
 
-### Option 1: Container Deployment (Recommended for Production)
+### Option 1: Production Deployment (Recommended)
+
+**🚀 One-Liner Quick Start:**
 
 ```bash
-# Clone repository
+# Pull latest pre-built images and start the entire stack
+./start-prod.sh
+```
+
+**What it does:**
+- ✅ Pulls latest images from GitHub Container Registry (GHCR)
+- ✅ Validates environment configuration (.env file)
+- ✅ Starts PostgreSQL, Backend, and Frontend containers
+- ✅ Provides helpful status messages and next steps
+
+**Pre-built Container Images Available:**
+
+```bash
+# Backend (Go API)
+podman pull ghcr.io/olemyk/ibm-storage-virtualize-snapshot-manager/backend:latest
+
+# Frontend (React + Nginx)
+podman pull ghcr.io/olemyk/ibm-storage-virtualize-snapshot-manager/frontend:latest
+
+# Database (PostgreSQL 16)
+podman pull docker.io/library/postgres:16-alpine
+```
+
+**Supported Architectures:**
+- `linux/amd64` - Intel/AMD 64-bit
+- `linux/arm64` - ARM 64-bit (Apple Silicon, ARM servers)
+
+**Step-by-Step Setup:**
+
+```bash
+# 1. Clone repository
 git clone <repository-url>
 cd ibm-storage-virtualize-snapshot-manager
 
-# Run setup
+# 2. Generate secure keys and certificates
 ./deploy/setup.sh
 
-# Configure environment
+# 3. Review and update .env file (optional)
 nano .env
 
-# Start services
-./deploy/start.sh
+# 4. Start the application (pulls images automatically)
+./start-prod.sh
 
-# Access at https://localhost
+# 5. Access at https://localhost
+# Default credentials: admin / admin123
+```
+
+**Additional Commands:**
+
+```bash
+# View logs (follow mode)
+./start-prod.sh --logs
+
+# Check container status
+./start-prod.sh --status
+
+# Stop all services
+./start-prod.sh --stop
+
+# Force rebuild and restart
+./start-prod.sh --rebuild
 ```
 
 **Features:**
 - ✅ Production-ready PostgreSQL database
 - ✅ HTTPS with Nginx reverse proxy
-- ✅ Automated health checks
-- ✅ Backup and restore scripts
-- ✅ One-command deployment
+- ✅ Automated health checks and restart policies
+- ✅ Backup and restore scripts included
+- ✅ One-command deployment and updates
+- ✅ Multi-architecture support (amd64, arm64)
+- ✅ Pre-built images from GitHub Container Registry
+- ✅ Automatic image pulling and validation
+- ✅ Color-coded status messages
+
+**See [QUICK_START_PRODUCTION.md](QUICK_START_PRODUCTION.md) for complete documentation.**
 
 ### Option 2: Local Development
 

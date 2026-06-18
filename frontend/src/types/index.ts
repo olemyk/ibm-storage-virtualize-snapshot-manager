@@ -146,6 +146,14 @@ export interface SystemTimeInfo {
   system_uptime: string;
   time_drift_ms?: number;
 }
+export interface Volume {
+  id: string;
+  name: string;
+  capacity?: string;
+  status?: string;
+  [key: string]: string | number | boolean | undefined;
+}
+
 
 export interface Snapshot {
   id: string;
@@ -158,7 +166,7 @@ export interface Snapshot {
   capacity?: string;
   status?: string;
   // Additional fields from IBM SVC API
-  [key: string]: any;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export interface AuditLog {
@@ -238,7 +246,7 @@ export interface NotificationHistory {
 export interface CreateChannelRequest {
   name: string;
   type: 'email' | 'slack' | 'webhook' | 'snmp';
-  config: Record<string, any>;
+  config: Record<string, string | number | boolean | string[]>;
   description?: string;
 }
 
@@ -247,7 +255,7 @@ export interface CreateAlertRuleRequest {
   description?: string;
   is_active: boolean;
   event_type: string;
-  conditions?: Record<string, any>;
+  conditions?: Record<string, string | number | boolean>;
   severity: 'info' | 'warning' | 'error' | 'critical';
   notification_channel_ids: string;
   throttle_minutes: number;

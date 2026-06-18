@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS storage_systems (
     skip_tls_verify BOOLEAN DEFAULT FALSE,
     connection_status VARCHAR(50) DEFAULT 'unknown',
     last_connection_check TIMESTAMP,
+    connection_error TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(ip_address, port)

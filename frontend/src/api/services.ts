@@ -6,6 +6,7 @@ import type {
   StorageSystem,
   CreateSystemRequest,
   VolumeGroup,
+  Volume,
   ScheduleWithVolumeGroup,
   CreateScheduleRequest,
   ExecutionWithDetails,
@@ -114,7 +115,7 @@ export const volumeGroupsApi = {
     const response = await apiClient.get(`/volumegroups/${id}/snapshots`);
     return response.data;
   },
-  listVolumes: async (id: number): Promise<any[]> => {
+  listVolumes: async (id: number): Promise<Volume[]> => {
     const response = await apiClient.get(`/volumegroups/${id}/volumes`);
     return response.data;
   },

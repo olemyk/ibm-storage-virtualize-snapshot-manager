@@ -14,7 +14,7 @@ export default function NotificationChannels() {
     name: '',
     type: 'email' as 'email' | 'slack' | 'webhook' | 'snmp',
     description: '',
-    config: {} as Record<string, any>,
+    config: {} as Record<string, string | number | boolean | string[]>,
   });
 
   const { data: channels, isLoading } = useQuery({
@@ -31,13 +31,14 @@ export default function NotificationChannels() {
       setMessage({ type: 'success', text: 'Channel created successfully' });
       setTimeout(() => setMessage(null), 3000);
     },
-    onError: (error: any) => {
+    onError: (err: unknown) => {
+      const error = err as { response?: { data?: { error?: string } } };
       setMessage({ type: 'error', text: error.response?.data?.error || 'Failed to create channel' });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => notificationsApi.updateChannel(id, data),
+    mutationFn: ({ id, data }: { id: number; data: Partial<typeof formData> }) => notificationsApi.updateChannel(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notification-channels'] });
       setShowForm(false);
@@ -46,7 +47,8 @@ export default function NotificationChannels() {
       setMessage({ type: 'success', text: 'Channel updated successfully' });
       setTimeout(() => setMessage(null), 3000);
     },
-    onError: (error: any) => {
+    onError: (err: unknown) => {
+      const error = err as { response?: { data?: { error?: string } } };
       setMessage({ type: 'error', text: error.response?.data?.error || 'Failed to update channel' });
     },
   });
@@ -58,7 +60,8 @@ export default function NotificationChannels() {
       setMessage({ type: 'success', text: 'Channel deleted successfully' });
       setTimeout(() => setMessage(null), 3000);
     },
-    onError: (error: any) => {
+    onError: (err: unknown) => {
+      const error = err as { response?: { data?: { error?: string } } };
       setMessage({ type: 'error', text: error.response?.data?.error || 'Failed to delete channel' });
     },
   });
@@ -75,7 +78,8 @@ export default function NotificationChannels() {
         });
       }, 5000);
     },
-    onError: (error: any, channelId) => {
+    onError: (err: unknown, channelId) => {
+      const error = err as { response?: { data?: { error?: string } } };
       setTestResults(prev => ({ ...prev, [channelId]: { type: 'error', text: error.response?.data?.error || 'Test failed' } }));
       setTimeout(() => {
         setTestResults(prev => {
@@ -148,7 +152,7 @@ export default function NotificationChannels() {
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>SMTP Host *</label>
               <input
                 type="text"
-                value={formData.config.smtp_host || ''}
+                value={String(formData.config.smtp_host || '')}
                 onChange={(e) => setFormData({ ...formData, config: { ...formData.config, smtp_host: e.target.value } })}
                 style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
                 required
@@ -158,7 +162,7 @@ export default function NotificationChannels() {
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>SMTP Port *</label>
               <input
                 type="number"
-                value={formData.config.smtp_port || 587}
+                value={typeof formData.config.smtp_port === 'number' ? formData.config.smtp_port : 587}
                 onChange={(e) => setFormData({ ...formData, config: { ...formData.config, smtp_port: parseInt(e.target.value) } })}
                 style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
                 required
@@ -168,7 +172,7 @@ export default function NotificationChannels() {
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Username *</label>
               <input
                 type="text"
-                value={formData.config.username || ''}
+                value={String(formData.config.username || '')}
                 onChange={(e) => setFormData({ ...formData, config: { ...formData.config, username: e.target.value } })}
                 style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
                 required
@@ -178,7 +182,7 @@ export default function NotificationChannels() {
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Password *</label>
               <input
                 type="password"
-                value={formData.config.password_encrypted || ''}
+                value={String(formData.config.password_encrypted || '')}
                 onChange={(e) => setFormData({ ...formData, config: { ...formData.config, password_encrypted: e.target.value } })}
                 style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
                 required
@@ -188,7 +192,7 @@ export default function NotificationChannels() {
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>From Address *</label>
               <input
                 type="email"
-                value={formData.config.from || ''}
+                value={String(formData.config.from || '')}
                 onChange={(e) => setFormData({ ...formData, config: { ...formData.config, from: e.target.value } })}
                 style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
                 required
@@ -209,7 +213,7 @@ export default function NotificationChannels() {
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <input
                   type="checkbox"
-                  checked={formData.config.use_tls || false}
+                  checked={!!formData.config.use_tls}
                   onChange={(e) => setFormData({ ...formData, config: { ...formData.config, use_tls: e.target.checked } })}
                 />
                 Use TLS
@@ -217,7 +221,7 @@ export default function NotificationChannels() {
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <input
                   type="checkbox"
-                  checked={formData.config.skip_verify || false}
+                  checked={!!formData.config.skip_verify}
                   onChange={(e) => setFormData({ ...formData, config: { ...formData.config, skip_verify: e.target.checked } })}
                 />
                 Skip TLS Verify
@@ -233,7 +237,7 @@ export default function NotificationChannels() {
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Webhook URL *</label>
               <input
                 type="url"
-                value={formData.config.webhook_url_encrypted || ''}
+                value={String(formData.config.webhook_url_encrypted || '')}
                 onChange={(e) => setFormData({ ...formData, config: { ...formData.config, webhook_url_encrypted: e.target.value } })}
                 style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
                 placeholder="https://hooks.slack.com/services/..."
@@ -244,7 +248,7 @@ export default function NotificationChannels() {
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Channel</label>
               <input
                 type="text"
-                value={formData.config.channel || ''}
+                value={String(formData.config.channel || '')}
                 onChange={(e) => setFormData({ ...formData, config: { ...formData.config, channel: e.target.value } })}
                 style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
                 placeholder="#alerts"
@@ -254,7 +258,7 @@ export default function NotificationChannels() {
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Username</label>
               <input
                 type="text"
-                value={formData.config.username || ''}
+                value={String(formData.config.username || '')}
                 onChange={(e) => setFormData({ ...formData, config: { ...formData.config, username: e.target.value } })}
                 style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
                 placeholder="Snapshot Manager"
@@ -270,7 +274,7 @@ export default function NotificationChannels() {
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Webhook URL *</label>
               <input
                 type="url"
-                value={formData.config.url || ''}
+                value={String(formData.config.url || '')}
                 onChange={(e) => setFormData({ ...formData, config: { ...formData.config, url: e.target.value } })}
                 style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
                 required
@@ -279,7 +283,7 @@ export default function NotificationChannels() {
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Method</label>
               <select
-                value={formData.config.method || 'POST'}
+                value={String(formData.config.method || 'POST')}
                 onChange={(e) => setFormData({ ...formData, config: { ...formData.config, method: e.target.value } })}
                 style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
               >
@@ -292,7 +296,7 @@ export default function NotificationChannels() {
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Timeout (seconds)</label>
               <input
                 type="number"
-                value={formData.config.timeout || 30}
+                value={typeof formData.config.timeout === 'number' ? formData.config.timeout : 30}
                 onChange={(e) => setFormData({ ...formData, config: { ...formData.config, timeout: parseInt(e.target.value) } })}
                 style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
               />
@@ -307,7 +311,7 @@ export default function NotificationChannels() {
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>SNMP Host *</label>
               <input
                 type="text"
-                value={formData.config.host || ''}
+                value={String(formData.config.host || '')}
                 onChange={(e) => setFormData({ ...formData, config: { ...formData.config, host: e.target.value } })}
                 style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
                 required
@@ -317,7 +321,7 @@ export default function NotificationChannels() {
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Port</label>
               <input
                 type="number"
-                value={formData.config.port || 162}
+                value={typeof formData.config.port === 'number' ? formData.config.port : 162}
                 onChange={(e) => setFormData({ ...formData, config: { ...formData.config, port: parseInt(e.target.value) } })}
                 style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
               />
@@ -326,7 +330,7 @@ export default function NotificationChannels() {
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Community String *</label>
               <input
                 type="text"
-                value={formData.config.community || ''}
+                value={String(formData.config.community || '')}
                 onChange={(e) => setFormData({ ...formData, config: { ...formData.config, community: e.target.value } })}
                 style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
                 required
@@ -401,7 +405,7 @@ export default function NotificationChannels() {
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Channel Type *</label>
               <select
                 value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value as any, config: {} })}
+                onChange={(e) => setFormData({ ...formData, type: e.target.value as 'email' | 'slack' | 'webhook' | 'snmp', config: {} })}
                 style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
                 disabled={!!editingChannel}
               >

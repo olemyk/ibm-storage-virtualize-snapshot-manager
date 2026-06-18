@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { notificationsApi } from '../api/services';
 import { useState } from 'react';
-import type { AlertRule } from '../types';
+import type { AlertRule, CreateAlertRuleRequest } from '../types';
 
 export default function AlertRules() {
   const queryClient = useQueryClient();
@@ -38,13 +38,14 @@ export default function AlertRules() {
       setMessage({ type: 'success', text: 'Alert rule created successfully' });
       setTimeout(() => setMessage(null), 3000);
     },
-    onError: (error: any) => {
+    onError: (err: unknown) => {
+      const error = err as { response?: { data?: { error?: string } } };
       setMessage({ type: 'error', text: error.response?.data?.error || 'Failed to create rule' });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => notificationsApi.updateRule(id, data),
+    mutationFn: ({ id, data }: { id: number; data: Partial<CreateAlertRuleRequest> }) => notificationsApi.updateRule(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['alert-rules'] });
       setShowForm(false);
@@ -53,7 +54,8 @@ export default function AlertRules() {
       setMessage({ type: 'success', text: 'Alert rule updated successfully' });
       setTimeout(() => setMessage(null), 3000);
     },
-    onError: (error: any) => {
+    onError: (err: unknown) => {
+      const error = err as { response?: { data?: { error?: string } } };
       setMessage({ type: 'error', text: error.response?.data?.error || 'Failed to update rule' });
     },
   });
@@ -65,7 +67,8 @@ export default function AlertRules() {
       setMessage({ type: 'success', text: 'Alert rule deleted successfully' });
       setTimeout(() => setMessage(null), 3000);
     },
-    onError: (error: any) => {
+    onError: (err: unknown) => {
+      const error = err as { response?: { data?: { error?: string } } };
       setMessage({ type: 'error', text: error.response?.data?.error || 'Failed to delete rule' });
     },
   });
@@ -242,7 +245,7 @@ export default function AlertRules() {
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Minimum Severity *</label>
                 <select
                   value={formData.severity}
-                  onChange={(e) => setFormData({ ...formData, severity: e.target.value as any })}
+                  onChange={(e) => setFormData({ ...formData, severity: e.target.value as 'info' | 'warning' | 'error' | 'critical' })}
                   style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
                   required
                 >

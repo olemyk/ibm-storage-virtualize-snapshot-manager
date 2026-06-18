@@ -158,8 +158,9 @@ export default function Systems() {
       setMessage({ type: 'success', text: 'Storage system added successfully! Use the Test button to verify the connection.' });
       setTimeout(() => setMessage(null), MESSAGE_DISPLAY_DURATION_MS);
     },
-    onError: (error: any) => {
-      setMessage({ type: 'error', text: error.response?.data?.error || error.message });
+    onError: (err: unknown) => {
+      const error = err as { response?: { data?: { error?: string } }; message?: string };
+      setMessage({ type: 'error', text: error.response?.data?.error || error.message || 'An error occurred' });
       setTimeout(() => setMessage(null), MESSAGE_DISPLAY_DURATION_MS);
     },
   });
@@ -175,8 +176,9 @@ export default function Systems() {
       setMessage({ type: 'success', text: 'Storage system updated successfully!' });
       setTimeout(() => setMessage(null), MESSAGE_DISPLAY_DURATION_MS);
     },
-    onError: (error: any) => {
-      setMessage({ type: 'error', text: error.response?.data?.error || error.message });
+    onError: (err: unknown) => {
+      const error = err as { response?: { data?: { error?: string } }; message?: string };
+      setMessage({ type: 'error', text: error.response?.data?.error || error.message || 'An error occurred' });
       setTimeout(() => setMessage(null), 5000);
     },
   });
@@ -188,8 +190,9 @@ export default function Systems() {
       setMessage({ type: 'success', text: 'Storage system deleted successfully!' });
       setTimeout(() => setMessage(null), MESSAGE_DISPLAY_DURATION_MS);
     },
-    onError: (error: any) => {
-      setMessage({ type: 'error', text: error.response?.data?.error || error.message });
+    onError: (err: unknown) => {
+      const error = err as { response?: { data?: { error?: string } }; message?: string };
+      setMessage({ type: 'error', text: error.response?.data?.error || error.message || 'An error occurred' });
       setTimeout(() => setMessage(null), 5000);
     },
   });
@@ -200,8 +203,9 @@ export default function Systems() {
       setTestResults(prev => ({ ...prev, [systemId]: { type: 'success', text: 'Connection successful!' } }));
       setTimeout(() => setTestResults(prev => { const newResults = { ...prev }; delete newResults[systemId]; return newResults; }), MESSAGE_DISPLAY_DURATION_MS);
     },
-    onError: (error: any, systemId) => {
-      const errorMsg = error.response?.data?.error || error.message;
+    onError: (err: unknown, systemId) => {
+      const error = err as { response?: { data?: { error?: string } }; message?: string };
+      const errorMsg = error.response?.data?.error || error.message || 'Connection failed';
       setTestResults(prev => ({ ...prev, [systemId]: { type: 'error', text: errorMsg } }));
       setTimeout(() => setTestResults(prev => { const newResults = { ...prev }; delete newResults[systemId]; return newResults; }), ERROR_MESSAGE_DISPLAY_DURATION_MS);
     },
@@ -331,8 +335,9 @@ export default function Systems() {
                   text: `Health check completed: ${result.results.filter(r => r.status === 'connected').length} connected, ${result.results.filter(r => r.status === 'disconnected').length} disconnected`
                 });
                 setTimeout(() => setMessage(null), MESSAGE_DISPLAY_DURATION_MS);
-              } catch (error: any) {
-                setMessage({ type: 'error', text: 'Health check failed: ' + (error.response?.data?.error || error.message) });
+              } catch (err: unknown) {
+                const error = err as { response?: { data?: { error?: string } }; message?: string };
+                setMessage({ type: 'error', text: 'Health check failed: ' + (error.response?.data?.error || error.message || 'Unknown error') });
                 setTimeout(() => setMessage(null), MESSAGE_DISPLAY_DURATION_MS);
               }
             }}

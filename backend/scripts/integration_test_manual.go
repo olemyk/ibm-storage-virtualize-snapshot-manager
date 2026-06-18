@@ -89,7 +89,7 @@ func (c *TestClient) Step1_Login() error {
 
 	loginBody := map[string]string{
 		"username": "admin",
-		"password": "admin123",
+		"password": "admin1234",
 	}
 
 	respBody, err := c.makeRequest("POST", "/api/auth/login", loginBody)
@@ -342,7 +342,7 @@ func main() {
 	defer logFile.Close()
 	log.SetOutput(io.MultiWriter(os.Stdout, logFile))
 
-	client := NewTestClient("https://localhost")
+	client := NewTestClient("https://10.33.3.104")
 
 	client.Log("=== IBM Storage Virtualize Snapshot Manager - Manual Integration Test ===")
 	client.Log("Test started at: %s", time.Now().Format("2006-01-02 15:04:05"))
@@ -399,7 +399,7 @@ func main() {
 	client.Log("  - Schedules: Manual_Test_Daily_02_00 (ID: %d), Manual_Test_Daily_03_00 (ID: %d)", schedule1ID, schedule2ID)
 	client.Log("")
 	client.Log("You can now:")
-	client.Log("  1. Open https://localhost in your browser")
+	client.Log("  1. Open https://10.33.3.104 in your browser")
 	client.Log("  2. Login with admin/admin123")
 	client.Log("  3. Verify the systems, schedules, and snapshot executions")
 	client.Log("  4. Manually delete the test resources when done")

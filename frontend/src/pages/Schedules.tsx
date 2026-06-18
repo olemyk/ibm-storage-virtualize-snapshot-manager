@@ -154,7 +154,8 @@ export default function Schedules() {
       setTimeout(() => setMessage(null), MESSAGE_DISPLAY_DURATION_MS);
       setConfirmExecute(null);
     },
-    onError: (error: any) => {
+    onError: (err: unknown) => {
+      const error = err as { response?: { data?: { error?: string } } };
       setMessage({
         type: 'error',
         text: error.response?.data?.error || 'Failed to execute snapshot'

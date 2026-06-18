@@ -16,7 +16,7 @@ export default function NotificationHistory() {
     queryFn: () => notificationsApi.listHistory(filters),
   });
 
-  const handleFilterChange = (key: keyof NotificationHistoryFilters, value: any) => {
+  const handleFilterChange = (key: keyof NotificationHistoryFilters, value: string | number | undefined) => {
     setFilters(prev => ({
       ...prev,
       [key]: value,

@@ -33,7 +33,8 @@ export default function VolumeGroups() {
       if (!selectedSystemId) return [];
       try {
         return await volumeGroupsApi.listBySystem(selectedSystemId);
-      } catch (error: any) {
+      } catch (err: unknown) {
+        const error = err as { response?: { data?: { error?: string } } };
         // Show error message
         setMessage({
           type: 'error',
@@ -69,10 +70,11 @@ export default function VolumeGroups() {
       if (selectedSystemId === systemId) {
         refetchVolumeGroups();
       }
-    } catch (error: any) {
-      setMessage({ 
-        type: 'error', 
-        text: error.response?.data?.error || 'Failed to sync volume groups' 
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      setMessage({
+        type: 'error',
+        text: error.response?.data?.error || 'Failed to sync volume groups'
       });
       setTimeout(() => setMessage(null), ERROR_MESSAGE_DISPLAY_DURATION_MS);
     } finally {
@@ -251,7 +253,7 @@ export default function VolumeGroups() {
           <h2 style={{ marginTop: 0, marginBottom: '1rem' }}>Volume Groups</h2>
 
           {/* Search and Filter */}
-          {!vgLoading && volumeGroups && volumeGroups.length > 0 && (
+          {!vgLoading && Array.isArray(volumeGroups) && volumeGroups.length > 0 && (
             <div style={{ marginBottom: '1rem' }}>
               <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem' }}>
                 <input
@@ -303,7 +305,7 @@ export default function VolumeGroups() {
 
           {vgLoading ? (
             <p>Loading volume groups...</p>
-          ) : !volumeGroups || volumeGroups.length === 0 ? (
+          ) : !Array.isArray(volumeGroups) || volumeGroups.length === 0 ? (
             <div style={{
               padding: '2rem',
               textAlign: 'center',
